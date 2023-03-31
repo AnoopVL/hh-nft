@@ -13,6 +13,8 @@ contract RandomIpfsNft is VRFConsumerBaseV2 {
   uint16 private constant REQUEST_CONFIRMATIONS = 3;
   uint32 private constant NUM_WORDS = 1;
 
+  mapping(uint256 => address) public s_requestIdToSender;
+
   constructor(
     address vrfCoordinatorV2,
     uint64 i_subscriptionId,
@@ -32,8 +34,10 @@ contract RandomIpfsNft is VRFConsumerBaseV2 {
       i_gasLane,
       i_subscriptionId,
       REQUEST_CONFIRMATIONS,
-      i_callbackGasLimit
+      i_callbackGasLimit,
+      NUM_WORDS
     );
+    s_requestIdToSender[requestId] = msg.sender;
   }
 
   function fullfilRandomWords(
