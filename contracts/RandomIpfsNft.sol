@@ -43,7 +43,9 @@ contract RandomIpfsNft is VRFConsumerBaseV2 {
   function fullfilRandomWords(
     uint256 requestId,
     uint256[] memory randomWords
-  ) internal override {}
+  ) internal override {
+    //comments added
+  }
 
   function tokenURI(uint256) public {}
 }
