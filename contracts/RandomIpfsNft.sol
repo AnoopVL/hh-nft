@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract RandomIpfsNft is VRFConsumerBaseV2 {
   VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
@@ -22,7 +23,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2 {
     uint32 i_callbackGasLimit,
     uint16 REQUEST_CONFIRMATIONS,
     uint32 NUM_WORDS
-  ) VRFConsumerBaseV2(vrfCoordinatorV2) {
+  ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721("Random IPFS NFT", "RIN") {
     i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
     i_subscriptionId = subscriptionId;
     i_gasLane = gasLane;
@@ -44,8 +45,10 @@ contract RandomIpfsNft is VRFConsumerBaseV2 {
     uint256 requestId,
     uint256[] memory randomWords
   ) internal override {
-    //comments added
+    address vicharOwner = s_requestIdToSender[requestId]; 
+    uint256 newTokenId = s_tokenCounter;
+    _safeMint = (vicharOwner, s_tokenCounter);
   }
 
-  function tokenURI(uint256) public {}
+  function tokenURI(uint256) public view override returns(string memory) {}
 }
