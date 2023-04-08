@@ -55,6 +55,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
   function getChanceArray() public pure returns (uint256[3] memory) {
     return [10, 30, MAX_CHANCE_VALUE];
     //index 0 has 10% , 1 has 30-10 = 20% and index 2 has 100-(30+10)= 60% chance
+    //continued
   }
 
   function tokenURI(uint256) public view override returns (string memory) {}
