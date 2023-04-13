@@ -6,6 +6,8 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+error RandomIpfsNft__RangeOutOfBounds();
+
 contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
   //type declaration
   enum Version {
@@ -56,9 +58,10 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
   ) internal override {
     address vicharOwner = s_requestIdToSender[requestId];
     uint256 newTokenId = s_tokenCounter;
-    _safeMint(vicharOwner, s_tokenCounter);
 
     uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
+    Version vicharVersion = getVersionfromModdedRng(moddedRng);
+    _safeMint(vicharOwner, s_tokenCounter);
   }
 
   function getVersionfromModdedRng(
@@ -74,6 +77,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
       }
       cumulativeSum += chanceArray[i];
     }
+    revert RandomIpfsNft__RangeOutOfBounds();
   }
 
   function getChanceArray() public pure returns (uint256[3] memory) {
