@@ -4,11 +4,14 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 error RandomIpfsNft__RangeOutOfBounds();
+error RandomIpfsNft__NeedMoreETHsent();
+error RandomIpfsNft__TransferFailed();
 
-contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
+contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   //type declaration
   enum Version {
     LATEST,
@@ -26,6 +29,11 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
   //NFT variables
   uint256 public s_tokenCounter;
   uint256 internal constant MAX_CHANCE_VALUE = 100;
+  string[] internal s_vicharTokenUris;
+  uint256 internal immutable i_mintFee;
+  //Events
+  event NftRequested(uint256 indexed requestId, address requester);
+  event NftMinted(Version vicharVersion, address minter);
 
   constructor(
     address vrfCoordinatorV2,
@@ -33,15 +41,22 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
     bytes32 i_gasLane,
     uint32 i_callbackGasLimit,
     uint16 REQUEST_CONFIRMATIONS,
-    uint32 NUM_WORDS
+    uint32 NUM_WORDS,
+    string[3] memory vicharTokenUris,
+    uint256 mintFee
   ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721("Random IPFS NFT", "RIN") {
     i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
     i_subscriptionId = subscriptionId;
     i_gasLane = gasLane;
     i_callbackGasLimit = callbackGasLimit;
+    s_vicharTokenUris = vicharTokenUris;
+    i_mintFee = mintFee;
   }
 
-  function requestNft() public returns (uint256 requestId) {
+  function requestNft() public payable returns (uint256 requestId) {
+    if (msg.value < i_mintFee) {
+      revert RandomIpfsNft__NeedMoreETHsent();
+    }
     requestId = i_vrfCoordinator.requestRandomWords(
       i_gasLane,
       i_subscriptionId,
@@ -61,7 +76,17 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
 
     uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
     Version vicharVersion = getVersionfromModdedRng(moddedRng);
-    _safeMint(vicharOwner, s_tokenCounter);
+    _safeMint(vicharOwner, newTokenId);
+    _setTokenURI(newTokenId, s_vicharTokenUris[uint256(vicharVersion)]);
+    emit NftMinted(vicharVersion, vicharOwner);
+  }
+
+  function withdraw() public onlyOwner {
+    uint256 amount = address(this).balance;
+    (bool success, ) = payable(msg.sender).call{value: amount}("");
+    if (!success) {
+      revert RandomIpfsNft__TransferFailed();
+    }
   }
 
   function getVersionfromModdedRng(
@@ -85,5 +110,17 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721 {
     //index 0 has 10% , 1 has 30-10 = 20% and index 2 has 100-(30+10)= 60% chance
   }
 
-  function tokenURI(uint256) public view override returns (string memory) {}
+  function getMintFee() public view returns (uint256) {
+    return i_mintFee;
+  }
+
+  function getVicharTokenUris(
+    uint256 index
+  ) public view returns (string memory) {
+    return s_vicharTokenUris[index];
+  }
+
+  function getTokenCounters() public view returns (uint256) {
+    return s_tokenCounter;
+  }
 }
