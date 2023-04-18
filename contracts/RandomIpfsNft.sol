@@ -73,7 +73,6 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   ) internal override {
     address vicharOwner = s_requestIdToSender[requestId];
     uint256 newTokenId = s_tokenCounter;
-
     uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
     Version vicharVersion = getVersionfromModdedRng(moddedRng);
     _safeMint(vicharOwner, newTokenId);
