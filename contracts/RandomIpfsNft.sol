@@ -6,12 +6,18 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 error RandomIpfsNft__RangeOutOfBounds();
 error RandomIpfsNft__NeedMoreETHsent();
 error RandomIpfsNft__TransferFailed();
+error RandomIpfsNft__AlreadyInitialized();
 
-contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
+abstract contract RandomIpfsNft is
+  VRFConsumerBaseV2,
+  ERC721URIStorage,
+  Ownable
+{
   //type declaration
   enum Version {
     LATEST,
@@ -33,24 +39,25 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   uint256 internal immutable i_mintFee;
   //Events
   event NftRequested(uint256 indexed requestId, address requester);
-  event NftMinted(Version vicharVersion, address minter);
+  //event NftMinted(Version vicharVersion, address minter);
+  event NftMinted(Version version, address minter);
 
   constructor(
     address vrfCoordinatorV2,
-    uint64 i_subscriptionId,
-    bytes32 i_gasLane,
-    uint32 i_callbackGasLimit,
-    uint16 REQUEST_CONFIRMATIONS,
-    uint32 NUM_WORDS,
+    uint64 subscriptionId,
+    bytes32 gasLane,
+    uint32 callbackGasLimit,
+    // uint16 REQUEST_CONFIRMATIONS,
+    // uint32 NUM_WORDS,
     string[3] memory vicharTokenUris,
     uint256 mintFee
   ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721("Random IPFS NFT", "RIN") {
     i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
-    i_subscriptionId = subscriptionId;
     i_gasLane = gasLane;
+    i_subscriptionId = subscriptionId;
+    i_mintFee = mintFee;
     i_callbackGasLimit = callbackGasLimit;
     s_vicharTokenUris = vicharTokenUris;
-    i_mintFee = mintFee;
   }
 
   function requestNft() public payable returns (uint256 requestId) {
@@ -70,7 +77,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   function fullfilRandomWords(
     uint256 requestId,
     uint256[] memory randomWords
-  ) internal override {
+  ) internal /*override*/ {
     address vicharOwner = s_requestIdToSender[requestId];
     uint256 newTokenId = s_tokenCounter;
     uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
@@ -94,9 +101,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint256 cumulativeSum = 0;
     uint256[3] memory chanceArray = getChanceArray();
     for (uint256 i = 0; i < chanceArray.length; i++) {
-      if (
-        moddedRng <= cumulativeSum && moddedRng < cumulativeSum + chanceArray[i]
-      ) {
+      if (moddedRng >= cumulativeSum && moddedRng < chanceArray[i]) {
         return Version(i);
       }
       cumulativeSum += chanceArray[i];
