@@ -34,7 +34,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   }
 
   console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-  await storeImages("");
+  await storeImages(imageLocation);
   // const args = [
   //   vrfCoordinatorV2Address,
   //   subscriptionId,
