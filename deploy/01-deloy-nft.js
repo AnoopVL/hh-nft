@@ -9,7 +9,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+  console.log("++++++++++++++++++++ 01-deploy-nft ++++++++++++++++++++++++");
   args = [];
   const basicNft = await deploy("BasicNFT", {
     from: deployer,

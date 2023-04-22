@@ -10,6 +10,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const chainId = network.config.chainId;
   // If we are on a local development network, we need to deploy mocks!
   if (chainId == 31337) {
+    console.log("+++++++++++++ 00-deploy-mocks +++++++++++++");
     log("Local network detected! Deploying mocks...");
     await deploy("VRFCoordinatorV2Mock", {
       from: deployer,

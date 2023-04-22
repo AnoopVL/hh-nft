@@ -10,7 +10,7 @@ const pinata = pinataSDK(pinataApiKey, pinataApiSecret);
 async function storeImages(imagesFilePath) {
   const fullImagesPath = path.resolve(imagesFilePath);
   const files = fs.readdirSync(fullImagesPath);
-  let response = [];
+  let responses = [];
   console.log("+++++++++++ Uploading to IPFS +++++++++++");
   for (fileIndex in files) {
     console.log(`Working on ${fileIndex} !!`);
@@ -18,7 +18,7 @@ async function storeImages(imagesFilePath) {
       `${fullImagesPath}/${files[fileIndex]}`
     );
     try {
-      const response = await pinata.pinFileToIPFS(readableStreamForFile);
+      const responses = await pinata.pinFileToIPFS(readableStreamForFile);
       responses.push(response);
     } catch (error) {
       console.log(error);

@@ -8,6 +8,18 @@ const storeImages = require("../utils/uploadToPinanta");
 
 const imageLocation = "../images/randomNFT";
 
+const metadataTemplates = {
+  name: "",
+  description: "",
+  image: "",
+  attributes: [
+    {
+      trait_type: "",
+      value: 100,
+    },
+  ],
+};
+
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
@@ -33,8 +45,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     subscriptionId = networkConfig[chainId].subscriptionId;
   }
 
-  console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-  await storeImages(imageLocation);
+  console.log("+++++++++++++++++++ 02-deploy-ipfs ++++++++++++++++++++");
+  //await storeImages(imageLocation);
   // const args = [
   //   vrfCoordinatorV2Address,
   //   subscriptionId,
