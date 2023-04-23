@@ -4,11 +4,14 @@ const {
   networkConfig,
 } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
-const storeImages = require("../utils/uploadToPinanta");
+const {
+  storeImages,
+  storeTokenUriMetadata,
+} = require("../utils/uploadToPinanta");
 
 const imageLocation = "../images/randomNFT";
 
-const metadataTemplates = {
+const metadataTemplate = {
   name: "",
   description: "",
   image: "",
@@ -61,6 +64,22 @@ async function handleTokenUris() {
   tokenUris = [];
   //store the image in IPFS
   //store the metadata in IPFS
+  const { responses: imageUploadResponses, files } = await storeImages(
+    imageLocation
+  );
+  for (imageUploadResponseIndex in imageUploadResponses) {
+    let tokenUriMetadata = { ...metadataTemplate };
+    tokenUriMetadata.name = files[imageUploadResponseIndex].replace(".png", "");
+    tokenUriMetadata.description = `An historic ${tokenUriMetadata.name} nft !`;
+    tokenUriMetadata.image = `ipfs://${imageUploadResponses[imageUploadResponseIndex].IpfsHash}`;
+    console.log(`Uploading ${tokenUriMetadata.name}...`);
+    const metadataUploadResponse = await storeTokenUriMetadata(
+      tokenUriMetadata
+    );
+    tokenUris.push(`ipfs://${metadataUploadResponse.IpfsHash}`);
+  }
+  console.log(`Token URIs uploaded are ...`);
+  console.log(tokenUris);
   return tokenUris;
 }
 
