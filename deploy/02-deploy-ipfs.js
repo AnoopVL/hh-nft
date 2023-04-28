@@ -9,7 +9,7 @@ const {
   storeTokenUriMetadata,
 } = require("../utils/uploadToPinanta");
 
-const imageLocation = "../images/randomNFT";
+const imageLocation = "../images/randomNFT/";
 
 const metadataTemplate = {
   name: "",
@@ -39,6 +39,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const vrfCoordinatorV2Mock = await ethers.getContract(
       "VRFCoordinatorV2Mock"
     );
+    // const VRFCoordinatorV2Mock = await ethers.getContract(
+    //   "VRFCoordinatorV2Mock"
+    // );
     vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
     const tx = await vrfCoordinatorV2Mock.createSubscription();
     const txReceipt = await tx.wait(1);
