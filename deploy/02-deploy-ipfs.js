@@ -83,4 +83,4 @@ async function handleTokenUris() {
   return tokenUris;
 }
 
-module.exports.tags = ["all", "randomipfs", "mocks"];
+module.exports.tags = ["all", "randomipfs", "main"];
